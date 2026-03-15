@@ -7,7 +7,7 @@ export const mockStatisticsProvider = {
   async getRecordStats(): Promise<RecordStats> {
     await delay(STATISTICS_MOCK_DELAY_MS)
     return {
-      total: 14872,
+      total: 14855,
       byCategory: [
         { category: 'Incident report', count: 4821 },
         { category: 'Audit record', count: 3240 },

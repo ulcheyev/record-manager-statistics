@@ -6,9 +6,10 @@ const demoRequestInterceptor = (req: InternalAxiosRequestConfig): InternalAxiosR
   return req
 }
 
+// TODO inject token
 const prodRequestInterceptor = (req: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
   const token = localStorage.getItem(API.TOKEN_STORAGE_KEY)
-  if (!token) throw new Error(API.ERRORS.NO_ACCESS_TOKEN)
+  // if (!token) throw new Error(API.ERRORS.NO_ACCESS_TOKEN)
 
   req.headers[API.HEADERS.AUTHORIZATION] = `Bearer ${token}`
   return req
