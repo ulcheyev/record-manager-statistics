@@ -14,6 +14,7 @@ export const API = {
     AUTHORIZATION: 'Authorization',
   },
   TOKEN_STORAGE_KEY: 'token',
+  RECORDS_STATISTICS_API_PATH: '/records',
 } as const
 
 export const QUERY_CONFIG = {
