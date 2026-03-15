@@ -1,0 +1,42 @@
+import { APP } from './constants'
+
+type AppMode = typeof APP.MODE.DEMO | typeof APP.MODE.PRODUCTION
+
+interface RuntimeEnv {
+  BASE_PATH: string
+  API_URL: string
+  AUTH_URL: string
+  APP_TITLE: string
+  APP_MODE: string
+}
+
+declare global {
+  interface Window {
+    __ENV__?: Partial<RuntimeEnv>
+  }
+}
+
+function get(key: keyof RuntimeEnv, buildTimeFallback: string): string {
+  const runtimeValue = window.__ENV__?.[key]
+  if (runtimeValue && runtimeValue.trim() !== '') return runtimeValue
+
+  const buildTimeValue = import.meta.env[`${APP.ENV_PREFIX}${key}`]
+  if (buildTimeValue && buildTimeValue.trim() !== '') return buildTimeValue
+
+  if (buildTimeFallback.trim() !== '') return buildTimeFallback
+
+  throw new Error(`[config] Missing required config value: ${key}`)
+}
+
+export const config = {
+  apiUrl: get('API_URL', 'http://localhost:1235/services/statistics-server'),
+  authUrl: get('AUTH_URL', 'http://localhost:1235/services/auth/realms/record-manager'),
+  basePath: get('BASE_PATH', '/statistics'),
+  appTitle: get('APP_TITLE', 'Record Manager Statistics'),
+  appMode: get('APP_MODE', APP.MODE.PRODUCTION) as AppMode, // ← use constant
+} as const
+
+export type Config = typeof config
+
+// Derived
+export const isDemo = config.appMode === APP.MODE.DEMO
