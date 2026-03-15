@@ -12,12 +12,12 @@ interface RuntimeEnv {
 
 declare global {
   interface Window {
-    __ENV__?: Partial<RuntimeEnv>
+    __RUNTIME_CONFIG__?: Partial<RuntimeEnv>
   }
 }
 
 function get(key: keyof RuntimeEnv, buildTimeFallback: string): string {
-  const runtimeValue = window.__ENV__?.[key]
+  const runtimeValue = window.__RUNTIME_CONFIG__?.[key]
   if (runtimeValue && runtimeValue.trim() !== '') return runtimeValue
 
   const buildTimeValue = import.meta.env[`${APP.ENV_PREFIX}${key}`]
