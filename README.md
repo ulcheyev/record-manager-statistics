@@ -1,4 +1,4 @@
-# record-manager-statistics
+# Record Manager Statistics
 
 Frontend statistics dashboard for the [Record Manager](https://github.com/kbss-cvut/record-manager-ui) ecosystem.
 Visualizes usage trends sourced from a semantic web backend.
