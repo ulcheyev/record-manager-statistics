@@ -94,19 +94,33 @@ export const mockStatisticsProvider: StatisticsProvider = {
   },
 
   async getByAuthor(_interval: StatisticsInterval) {
-    const baseStats = {
-      total: 30,
-      completionRate: 66.7,
-      rejectionRate: 10.0,
-      byPhase: { open: 8, completed: 20, rejected: 2 },
-    }
-    const authors = Array.from({ length: 10 }, (_, i) => ({
-      uri: `http://example.org/user/${i + 1}`,
-      fullName: `Author ${i + 1}`,
-      username: `author${i + 1}`,
-      institutionName: `Institution ${(i % 3) + 1}`,
-      ...baseStats,
-    }))
+    const institutions = [
+      'General Hospital',
+      'City Clinic',
+      'University Medical Center',
+      'Regional Health Institute',
+    ]
+
+    const authors = Array.from({ length: 10 }, (_, i) => {
+      const open = Math.floor(Math.random() * 10)
+      const completed = Math.floor(Math.random() * 20)
+      const rejected = Math.floor(Math.random() * 8)
+      const total = open + completed + rejected
+      const completionRate = total > 0 ? parseFloat(((completed / total) * 100).toFixed(1)) : 0
+      const rejectionRate = total > 0 ? parseFloat(((rejected / total) * 100).toFixed(1)) : 0
+
+      return {
+        uri: `http://example.org/user/${i + 1}`,
+        fullName: `Author ${i + 1}`,
+        username: `author${i + 1}`,
+        institutionName: institutions[i % institutions.length],
+        total,
+        completionRate,
+        rejectionRate,
+        byPhase: { open, completed, rejected },
+      }
+    })
+
     return {
       interval: { from: null, to: null, empty: true },
       authors,
