@@ -1,9 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
 import { statisticsProvider } from './provider'
-import { STATISTICS_QUERY_KEYS } from '@/features/statistics/constants.ts'
+import { type Granularity, QUERY_KEYS } from '@/config/constants.ts'
+import type { StatisticsInterval } from '@/features/statistics/dtoTypes.ts'
 
-export const useRecordStats = () =>
+export const useGeneral = (interval: StatisticsInterval) =>
   useQuery({
-    queryKey: STATISTICS_QUERY_KEYS.RECORDS(),
-    queryFn: () => statisticsProvider.getRecordStats(),
+    queryKey: [QUERY_KEYS.GENERAL, interval],
+    queryFn: () => statisticsProvider.getGeneral(interval),
+  })
+
+export const useAuthors = (interval: StatisticsInterval) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.AUTHORS, interval],
+    queryFn: () => statisticsProvider.getByAuthor(interval),
+  })
+export const useInstitutions = (interval: StatisticsInterval) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.INSTITUTIONS, interval],
+    queryFn: () => statisticsProvider.getByInstitution(interval),
+  })
+
+export const useTimeline = (interval: StatisticsInterval, granularity: Granularity) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.TIMELINE, interval, granularity],
+    queryFn: () => statisticsProvider.getTimeline(interval, granularity),
   })
