@@ -31,6 +31,7 @@ export const QUERY_KEYS = {
   AUTHORS: 'authors',
   TIMELINE: 'timeline',
   INSTITUTIONS: 'institutions',
+  FORM_TEMPLATES: 'formTemplates',
 } as const
 
 export const ROLES = {

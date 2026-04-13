@@ -15,6 +15,7 @@ import { ROLES } from '@/config/constants.ts'
 import { Unauthorized } from '@/shared/components/Unauthorized.tsx'
 import { GeneralPage } from '@/pages/GeneralPage.tsx'
 import { AuthorsPage } from '@/pages/AuthorsPage.tsx'
+import { FormsPage } from '@/pages/FormsPage.tsx'
 
 /**
  * Layout (UI only)
@@ -47,6 +48,10 @@ export const AppRouter = () => {
 
           <Route element={<ProtectedRoute roles={[ROLES.VIEW_STATISTICS]} />}>
             <Route path={routes.authors} element={<AuthorsPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute roles={[ROLES.VIEW_STATISTICS]} />}>
+            <Route path={routes.forms} element={<FormsPage />} />
           </Route>
 
           <Route path={routes.unauthorized} element={<Unauthorized />} />

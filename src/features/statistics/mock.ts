@@ -134,21 +134,25 @@ export const mockStatisticsProvider: StatisticsProvider = {
       templates: [
         {
           templateUri: 'http://example.org/form/admission',
+          templateLabel: 'example 1',
           count: 98,
           percentage: 39.7,
         },
         {
           templateUri: 'http://example.org/form/discharge',
+          templateLabel: 'example 2',
           count: 74,
           percentage: 30.0,
         },
         {
           templateUri: 'http://example.org/form/followup',
+          templateLabel: 'example 3',
           count: 45,
           percentage: 18.2,
         },
         {
           templateUri: 'http://example.org/form/emergency',
+          templateLabel: 'example 4',
           count: 30,
           percentage: 12.1,
         },
