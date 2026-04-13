@@ -25,3 +25,9 @@ export const useTimeline = (interval: StatisticsInterval, granularity: Granulari
     queryKey: [QUERY_KEYS.TIMELINE, interval, granularity],
     queryFn: () => statisticsProvider.getTimeline(interval, granularity),
   })
+
+export const useFormTemplates = (interval: StatisticsInterval) =>
+  useQuery({
+    queryKey: [QUERY_KEYS.FORM_TEMPLATES, interval],
+    queryFn: () => statisticsProvider.getByFormTemplate(interval),
+  })

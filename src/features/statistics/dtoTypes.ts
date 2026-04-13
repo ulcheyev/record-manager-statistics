@@ -88,6 +88,7 @@ export interface FormTemplateUsageDto {
 
 export interface TemplateSliceDto {
   templateUri: string
+  templateLabel: string
   count: number
   percentage: number
 }
