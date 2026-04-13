@@ -53,6 +53,7 @@ const buildOption = (dto: FormTemplateUsageDto) => ({
   ],
 })
 
+// Ensure a minimum height for the chart, but allow it to grow with more templates (52px per template is a good fit)
 const chartHeight = (count: number) => Math.max(200, count * 52)
 
 interface Props {
