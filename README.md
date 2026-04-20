@@ -7,7 +7,7 @@ Visualizes usage trends sourced from a semantic web backend.
 - [record-manager-statistics-server](https://github.com/ulcheyev/record-manager-statistics-server) — Spring Boot backend, SPARQL queries against GraphDB
 - [record-manager-ui](https://github.com/kbss-cvut/record-manager-ui) — main Record Manager frontend
 
-## [![Vercel Deploy](https://deploy-badge.vercel.app/vercel/media-asset-annotator?name=vercel+demo)](https://record-manager-statistics.vercel.app)
+## [![Vercel Deploy](https://deploy-badge.vercel.app/vercel/record-manager-statistics?name=vercel+demo)](https://record-manager-statistics.vercel.app/statistics)
 ![Build (main)](https://github.com/ulcheyev/record-manager-statistics/actions/workflows/build-and-push.yml/badge.svg?branch=main)
 
 ---
