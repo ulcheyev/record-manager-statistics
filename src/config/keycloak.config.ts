@@ -9,15 +9,10 @@ const kc = new Keycloak({
 
 if (!isDemo) {
   await kc.init({
-    onLoad: 'check-sso',
-    silentCheckSsoRedirectUri: window.location.origin + config.basePath + '/silent-check-sso.html',
-    checkLoginIframe: false, // handle token refresh manually in interceptor, so no need for the iframe
-    pkceMethod: false, // PKCE is not needed for public clients that don't have a secret
+    onLoad: 'login-required',
+    checkLoginIframe: false,
+    pkceMethod: false,
   })
-
-  if (!kc.authenticated) {
-    await kc.login()
-  }
 }
 
 export default kc
