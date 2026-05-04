@@ -1,6 +1,6 @@
 export const routes = {
-  general: '/general',
+  personal: '/personal',
   authors: '/authors',
-  forms: '/forms',
+  records: '/records',
   unauthorized: '/unauthorized',
 }

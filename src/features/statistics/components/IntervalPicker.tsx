@@ -1,4 +1,4 @@
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes.ts'
+import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
 
 const INPUT_CLASS =
   'rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors'
@@ -10,8 +10,10 @@ interface DateInputProps {
 }
 
 const DateInput = ({ label, value, onChange }: DateInputProps) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-xs text-gray-400">{label}</label>
+  <div className="flex flex-col gap-1">
+    <label className="text-[12px] text-gray-400 uppercase tracking-wider font-medium">
+      {label}
+    </label>
     <input
       type="date"
       value={value}
@@ -34,31 +36,26 @@ export const IntervalPicker = ({ value, onChange }: Props) => {
   const hasValue = value.from || value.to
 
   return (
-    <div className="flex flex-col gap-4 pb-5 border-b border-gray-100">
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="flex items-center gap-1.5 pb-3">
-          <span
-            className={`text-xs font-medium uppercase tracking-wide transition-colors ${
-              hasValue ? 'text-blue-400' : 'text-gray-400'
-            }`}
-          >
-            Interval
-          </span>
-        </div>
+    <div className="flex flex-wrap items-end gap-4">
+      <span
+        className={`pb-2 text-[12px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+          hasValue ? 'text-blue-500' : 'text-gray-400'
+        }`}
+      >
+        Interval
+      </span>
 
-        <DateInput label="From" value={value.from ?? ''} onChange={(val) => set('from', val)} />
+      <DateInput label="From" value={value.from ?? ''} onChange={(v) => set('from', v)} />
+      <DateInput label="To" value={value.to ?? ''} onChange={(v) => set('to', v)} />
 
-        <DateInput label="To" value={value.to ?? ''} onChange={(val) => set('to', val)} />
-
-        {hasValue && (
-          <button
-            onClick={clear}
-            className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Clear
-          </button>
-        )}
-      </div>
+      {hasValue && (
+        <button
+          onClick={clear}
+          className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          Clear
+        </button>
+      )}
     </div>
   )
 }

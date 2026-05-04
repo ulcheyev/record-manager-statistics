@@ -1,17 +1,26 @@
-import { useAuth } from '@/shared/hooks/useAuth'
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '@/shared/hooks/useAuth'
 import { routes } from '@/config/routes'
 import { recordManagerUrl } from '@/config/runtime'
+import {
+  canViewAuthors,
+  canViewRecords,
+  canViewStatistics,
+} from '@/features/statistics/model/permissions.model'
+import type { UserStatisticsPermissionsDto } from '@/features/statistics/dtoTypes'
+import { usePermissions } from '@/features/statistics/api/permissions.hooks.ts'
 
-const tabs = [
-  { label: 'General', to: routes.general },
-  { label: 'Authors', to: routes.authors },
-  { label: 'Forms', to: routes.forms },
-]
+const TABS: { label: string; to: string; visible: (p: UserStatisticsPermissionsDto) => boolean }[] =
+  [
+    { label: 'My Personal Statistics', to: routes.personal, visible: canViewStatistics },
+    { label: 'Authors', to: routes.authors, visible: canViewAuthors },
+    { label: 'Records', to: routes.records, visible: canViewRecords },
+  ]
 
 export const Header = () => {
-  const { fullName, email } = useAuth()
+  const { fullName, email, isAuthenticated } = useAuth()
+  const { data: permissions, isLoading } = usePermissions({ enabled: isAuthenticated })
   const [open, setOpen] = useState(false)
 
   const initials =
@@ -19,10 +28,10 @@ export const Header = () => {
       .split(' ')
       .map((n) => n[0])
       .join('. ') + '.'
+  const visibleTabs = permissions ? TABS.filter((t) => t.visible(permissions)) : []
 
   return (
     <header className="fixed top-0 left-0 right-0 h-15 z-100 flex items-center justify-between px-8 bg-white border-b border-gray-200">
-      {/* Left */}
       <div className="flex items-center gap-8 h-full">
         <button
           onClick={() => (window.location.href = recordManagerUrl)}
@@ -31,28 +40,33 @@ export const Header = () => {
           ← Record Manager
         </button>
 
-        <span className="font-bold text-base text-gray-900 whitespace-nowrap">Statistics</span>
-
         <nav className="flex items-center h-full gap-1">
-          {tabs.map((tab) => (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className={({ isActive }) =>
-                `flex items-center h-full px-3 text-sm no-underline border-b-2 transition-colors ${
-                  isActive
-                    ? 'text-blue-600 border-blue-600 font-semibold'
-                    : 'text-gray-500 border-transparent hover:text-gray-800'
-                }`
-              }
-            >
-              {tab.label}
-            </NavLink>
-          ))}
+          {isLoading
+            ? [80, 60, 72].map((w) => (
+                <div
+                  key={w}
+                  className="h-4 rounded bg-gray-100 animate-pulse mx-2"
+                  style={{ width: w }}
+                />
+              ))
+            : visibleTabs.map((tab) => (
+                <NavLink
+                  key={tab.to}
+                  to={tab.to}
+                  className={({ isActive }) =>
+                    `flex items-center h-full px-3 text-sm no-underline border-b-2 transition-colors ${
+                      isActive
+                        ? 'text-blue-600 border-blue-600 font-semibold'
+                        : 'text-gray-500 border-transparent hover:text-gray-800'
+                    }`
+                  }
+                >
+                  {tab.label}
+                </NavLink>
+              ))}
         </nav>
       </div>
 
-      {/* Right */}
       <div className="relative">
         <button
           onClick={() => setOpen((o) => !o)}
