@@ -1,21 +1,21 @@
 import kc from '@/config/keycloak.config'
 import { isDemo } from '@/config/runtime'
 
-const mockUser = {
-  user: { email: 'demo@example.com', given_name: 'Demo', family_name: 'User' },
+const DEMO = {
   email: 'demo@example.com',
   fullName: 'Demo User',
-  isAuthenticated: true,
-  hasRole: (_role: string) => true, // demo sees everything
+  username: 'demo',
+  isAuthenticated: true as const,
+  hasRole: (_role: string) => true,
 }
 
 export const useAuth = () => {
-  if (isDemo) return mockUser
+  if (isDemo) return DEMO
 
   return {
-    user: kc.tokenParsed,
     email: kc.tokenParsed?.email as string,
     fullName: `${kc.tokenParsed?.given_name} ${kc.tokenParsed?.family_name}`,
+    username: kc.tokenParsed?.preferred_username ?? '',
     isAuthenticated: kc.authenticated ?? false,
     hasRole: (role: string) => kc.hasRealmRole(role),
   }

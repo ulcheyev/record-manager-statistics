@@ -8,7 +8,7 @@ export const Unauthorized = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const from = (location.state as { from?: Location })?.from?.pathname ?? routes.general
+  const from = (location.state as { from?: Location })?.from?.pathname ?? routes.personal
 
   useEffect(() => {
     if (isAuthenticated) {

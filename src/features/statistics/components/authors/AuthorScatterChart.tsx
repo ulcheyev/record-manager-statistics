@@ -1,126 +1,255 @@
-import ReactECharts from 'echarts-for-react'
 import { useState } from 'react'
-import type { AuthorRecordStatsDto } from '@/features/statistics/dtoTypes'
+import ReactECharts from 'echarts-for-react'
+import type { AuthorWithInstitutionDto } from '@/features/statistics/dtoTypes'
 import { STYLES } from '@/config/constants'
-import { baseAxis, baseTooltip } from '@/shared/utils/chartUtils.ts'
-import { SegmentToggle } from '@/shared/components/SegmentToggle.tsx'
-import { ChartCard } from '@/shared/components/ChartCard.tsx'
+import { ViewTotalsBar } from './ViewTotalsBar'
+import { toAuthorViewModel } from '@/features/statistics/model/author.viewmodel'
+import {
+  getCorrectnessTotals,
+  getCompletionTotals,
+  getAnsweredTotals,
+  getUnansweredTotals,
+} from '@/features/statistics/model/author.aggregates'
 
-type YAxisKey = 'completionRate' | 'rejectionRate'
+interface ScatterViewDef {
+  key: string
+  label: string
+  title: string
+  yName: string
+  yFmt: string
+  yMax?: number
+  yField: (a: AuthorWithInstitutionDto) => number
+  tooltipLines: (a: AuthorWithInstitutionDto) => string[]
+  getTotals: (
+    authors: AuthorWithInstitutionDto[],
+  ) => { label: string; value: number | string; color?: string; dim?: boolean }[]
+  getAuthorLabel: (a: AuthorWithInstitutionDto) => string
+}
 
-const HEIGHT = 400
-
-const Y_OPTIONS: { value: YAxisKey; label: string }[] = [
-  { value: 'completionRate', label: 'Completion rate' },
-  { value: 'rejectionRate', label: 'Rejection rate' },
+const SCATTER_VIEWS: ScatterViewDef[] = [
+  {
+    key: 'correctness',
+    label: 'Correctness',
+    title: 'Records vs Correctness Rate',
+    yName: 'Correctness (%)',
+    yFmt: '{value}%',
+    yMax: 100,
+    getTotals: getCorrectnessTotals,
+    getAuthorLabel: (a) => `${a.totalCorrectAnswers}/${a.evaluableAnswers}`,
+    yField: (a) => a.correctnessRate,
+    tooltipLines: (a) => [
+      `Records: <b>${a.totalRecords}</b>`,
+      `Correctness: <b>${a.correctnessRate.toFixed(1)}%</b>`,
+      `Correct / evaluable: <b>${a.totalCorrectAnswers}</b> / <b>${a.evaluableAnswers}</b>`,
+    ],
+  },
+  {
+    key: 'completion',
+    label: 'Completion',
+    title: 'Records vs Completion Rate',
+    yName: 'Completion (%)',
+    yFmt: '{value}%',
+    yMax: 100,
+    getTotals: getCompletionTotals,
+    getAuthorLabel: (a) => `${a.byPhase.completed}/${a.totalRecords}`,
+    yField: (a) => a.completionRate,
+    tooltipLines: (a) => [
+      `Records: <b>${a.totalRecords}</b>`,
+      `Completion: <b>${a.completionRate.toFixed(1)}%</b>`,
+      `Rejection: <b>${a.rejectionRate.toFixed(1)}%</b>`,
+    ],
+  },
+  {
+    key: 'answered',
+    label: 'Answered',
+    title: 'Records vs Answers Given',
+    yName: 'Answers given',
+    yFmt: '{value}',
+    getTotals: getAnsweredTotals,
+    getAuthorLabel: (a) => `${a.totalAnswers}`,
+    yField: (a) => a.totalAnswers,
+    tooltipLines: (a) => {
+      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
+      const unans = totalQ > 0 ? totalQ - a.totalAnswers : null
+      return [
+        `Records: <b>${a.totalRecords}</b>`,
+        `Answered: <b>${a.totalAnswers}</b>`,
+        ...(unans !== null ? [`Unanswered: <b>${unans}</b>`] : []),
+        `Evaluable answered: <b>${a.evaluableAnswers}</b>`,
+      ]
+    },
+  },
+  {
+    key: 'unanswered',
+    label: 'Unanswered',
+    title: 'Records vs Unanswered Questions',
+    yName: 'Unanswered questions',
+    yFmt: '{value}',
+    getTotals: getUnansweredTotals,
+    getAuthorLabel: (a) => {
+      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
+      return `${Math.max(0, totalQ - a.totalAnswers)}/${totalQ}`
+    },
+    yField: (a) => {
+      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
+      return totalQ > 0 ? Math.max(0, totalQ - a.totalAnswers) : 0
+    },
+    tooltipLines: (a) => {
+      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
+      const unans = Math.max(0, totalQ - a.totalAnswers)
+      return [
+        `Records: <b>${a.totalRecords}</b>`,
+        `Unanswered: <b>${unans}</b> of ${totalQ}`,
+        `Answered: <b>${a.totalAnswers}</b>`,
+      ]
+    },
+  },
 ]
 
-const resolveColor = (a: AuthorRecordStatsDto, yAxis: YAxisKey): string => {
-  const isGood =
-    yAxis === 'completionRate'
-      ? a.completionRate >= a.rejectionRate
-      : a.rejectionRate <= a.completionRate
+const ALL_VIEWS = [...SCATTER_VIEWS.map((v) => ({ key: v.key, label: v.label }))]
 
-  return isGood ? STYLES.COLORS.completed : STYLES.COLORS.rejected
-}
+const ScatterView = ({
+  authors,
+  viewDef,
+}: {
+  authors: AuthorWithInstitutionDto[]
+  viewDef: ScatterViewDef
+}) => {
+  const groups = new Map<string, AuthorWithInstitutionDto[]>()
+  for (const a of authors) {
+    const key = toAuthorViewModel(a).institutionName || 'Unknown'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(a)
+  }
 
-const applyStackOffset = (authors: AuthorRecordStatsDto[], yAxis: YAxisKey) => {
-  const seen = new Map<string, number>()
-  return authors.map((a) => {
-    // Group by x (total) and y (rate) value to stack overlapping points
-    const key = `${a.total}-${a[yAxis].toFixed(1)}`
-    const count = seen.get(key) ?? 0
-    seen.set(key, count + 1)
-    return {
-      // Second param in value is adjusted y to create a stack effect for points with same x and y
-      value: [a.total, parseFloat(a[yAxis].toFixed(1)) - count * 5],
-      name: `${a.username}`,
-      uri: a.uri,
-      itemStyle: { color: resolveColor(a, yAxis), opacity: 0.85 },
-    }
-  })
-}
+  const maxX = Math.max(...authors.map((a) => a.totalRecords), 1)
+  const maxY = Math.max(...authors.map((a) => viewDef.yField(a)), 1)
 
-const buildOption = (authors: AuthorRecordStatsDto[], yAxis: YAxisKey) => {
-  const maxTotal = Math.max(...authors.map((a) => a.total), 1)
-  const yLabel = Y_OPTIONS.find((o) => o.value === yAxis)?.label ?? yAxis
+  const series = [...groups.entries()].map(([instName, instAuthors], idx) => ({
+    name: instName,
+    type: 'scatter',
+    data: instAuthors.map((a) => ({
+      value: [a.totalRecords, viewDef.yField(a)],
+      name: toAuthorViewModel(a).displayName,
+      author: a,
+    })),
+    symbolSize: 9,
+    itemStyle: {
+      color: STYLES.INSTITUTION_PALETTE[idx % STYLES.INSTITUTION_PALETTE.length],
+      opacity: 0.85,
+      borderColor: '#fff',
+      borderWidth: 1.5,
+    },
+    emphasis: {
+      scale: 2,
+      label: {
+        show: true,
+        formatter: (p: any) => p.name as string,
+        position: 'top',
+        fontSize: 10,
+        color: STYLES.CHART.emphasisLabelColor,
+        backgroundColor: STYLES.CHART.tooltipBgColor,
+        padding: [2, 4],
+        borderRadius: 3,
+      },
+    },
+  }))
 
-  return {
+  const option = {
+    legend: {
+      data: [...groups.keys()],
+      top: 4,
+      textStyle: { fontSize: 10, color: STYLES.CHART.labelColor },
+      itemWidth: 10,
+      itemHeight: 10,
+    },
     tooltip: {
-      ...baseTooltip,
       trigger: 'item',
       formatter: (p: any) => {
-        const a = authors.find((x) => x.uri === p.data.uri)
-        if (!a) return ''
+        const a = p.data.author as AuthorWithInstitutionDto
+        const vm = toAuthorViewModel(a)
         return [
-          `<b>${a.username}</b>`,
-          `Total: <b>${a.total}</b>`,
-          `Completed: <b>${a.byPhase.completed}</b>`,
-          `Open: <b>${a.byPhase.open}</b>`,
-          `Rejected: <b>${a.byPhase.rejected}</b>`,
-          `Completion: <b>${a.completionRate.toFixed(1)}%</b>`,
-          `Rejection: <b>${a.rejectionRate.toFixed(1)}%</b>`,
-        ].join('<br/>')
+          `<b>${vm.displayName}</b>`,
+          vm.institutionName,
+          ...viewDef.tooltipLines(a),
+          `<span style="color:#9ca3af">Total: <b style="color:#374151">${viewDef.getAuthorLabel(a)}</b></span>`,
+        ]
+          .filter(Boolean)
+          .join('<br/>')
       },
     },
-    grid: { top: 24, right: 24, bottom: 48, left: 24, containLabel: true },
+    grid: { left: 56, right: 16, top: 44, bottom: 36 },
     xAxis: {
-      ...baseAxis,
-      name: 'Total records',
-      nameLocation: 'middle',
-      nameGap: 28,
-      nameTextStyle: { color: '#9ca3af', fontSize: 11 },
       type: 'value',
-      minInterval: 1,
+      name: 'Total Records',
+      nameLocation: 'middle',
+      nameGap: 24,
+      nameTextStyle: { fontSize: 11, color: STYLES.CHART.axisLabelColor },
+      min: 0,
+      max: Math.ceil(maxX * 1.08),
+      axisLabel: { fontSize: 11, color: STYLES.CHART.axisLabelColor },
+      splitLine: { lineStyle: { color: STYLES.CHART.splitLineColor } },
+      axisLine: { show: false },
     },
     yAxis: {
-      ...baseAxis,
-      name: yLabel,
-      nameLocation: 'middle',
-      nameRotate: 90,
-      nameGap: 40,
-      nameTextStyle: { color: '#9ca3af', fontSize: 11 },
       type: 'value',
+      name: viewDef.yName,
+      nameLocation: 'middle',
+      nameGap: 44,
+      nameTextStyle: { fontSize: 11, color: STYLES.CHART.axisLabelColor },
       min: 0,
-      max: 100,
-      axisLabel: { color: '#9ca3af', fontSize: 11, formatter: (v: number) => `${v}%` },
+      ...(viewDef.yMax !== undefined ? { max: viewDef.yMax } : { max: Math.ceil(maxY * 1.1) }),
+      axisLabel: { fontSize: 11, color: STYLES.CHART.axisLabelColor, formatter: viewDef.yFmt },
+      splitLine: { lineStyle: { color: STYLES.CHART.splitLineColor } },
+      axisLine: { show: false },
     },
-    series: [
-      {
-        type: 'scatter',
-        symbolSize: (_val: number[], params: any) => {
-          const a = authors[params.dataIndex]
-          return a ? 16 + (a.total / maxTotal) * 32 : 16
-        },
-        data: applyStackOffset(authors, yAxis),
-        label: {
-          show: true,
-          position: 'top',
-          color: '#6b7280',
-          fontSize: 10,
-          formatter: (p: any) => p.data.name,
-        },
-      },
-    ],
+    series,
   }
+
+  const authorKey = authors.map((a) => a.username).join(',')
+
+  return <ReactECharts key={authorKey} option={option} style={{ height: '300px' }} notMerge />
 }
 
 interface Props {
-  authors: AuthorRecordStatsDto[]
+  authors: AuthorWithInstitutionDto[]
 }
 
 export const AuthorScatterChart = ({ authors }: Props) => {
-  const [yAxis, setYAxis] = useState<YAxisKey>('completionRate')
+  const [viewKey, setViewKey] = useState(SCATTER_VIEWS[0].key)
+  const scatterDef = SCATTER_VIEWS.find((v) => v.key === viewKey)
 
   return (
-    <ChartCard
-      title="Author performance"
-      subtitle="Bubble size = total records"
-      height={HEIGHT}
-      hasData={authors.length > 0}
-      controls={<SegmentToggle options={Y_OPTIONS} value={yAxis} onChange={setYAxis} />}
-    >
-      <ReactECharts option={buildOption(authors, yAxis)} style={{ height: HEIGHT }} notMerge />
-    </ChartCard>
+    <div className="rounded-xl bg-white border border-gray-100 p-5">
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+          {scatterDef ? scatterDef.title : 'Author details'}
+        </p>
+        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-[11px] font-medium">
+          {ALL_VIEWS.map((v, i) => (
+            <button
+              key={v.key}
+              onClick={() => setViewKey(v.key)}
+              className={`px-3 py-1.5 transition-colors ${i > 0 ? 'border-l border-gray-200' : ''} ${
+                viewKey === v.key
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {authors.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-400">No author data</p>
+      ) : scatterDef ? (
+        <>
+          <ViewTotalsBar items={scatterDef.getTotals(authors)} />
+          <ScatterView authors={authors} viewDef={scatterDef} />
+        </>
+      ) : null}
+    </div>
   )
 }
