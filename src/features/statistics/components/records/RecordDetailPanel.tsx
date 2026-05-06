@@ -177,7 +177,7 @@ const RecordAnswerBreakdown = ({ vm }: { vm: RecordDetailViewModel }) => (
 
     {vm.answers.hasCorrectness && (
       <BreakdownSection
-        title="Evaluable correctness"
+        title="Correct / Incorrect"
         segments={[
           {
             color: 'bg-emerald-500',

@@ -25,7 +25,7 @@ export const PersonalOverviewContent = ({ data }: Props) => {
         <StatCard label="Rejection rate" value={vm.rejectionRateFmt} accent="danger" />
 
         <StatCard
-          label="Total answers (completed)"
+          label="Total answers"
           value={isEmpty ? 'No completed records yet' : vm.answers.totalAnswers}
           hint={`${vm.answers.evaluableAnswered} evaluable`}
           small={isEmpty}
