@@ -1,29 +1,30 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import ReactECharts from 'echarts-for-react'
-import type { AuthorWithInstitutionDto } from '@/features/statistics/dtoTypes'
 import { STYLES } from '@/config/constants'
 import { ViewTotalsBar } from './ViewTotalsBar'
+import { toAuthorViewModel } from '@/features/statistics/model/author.viewmodel'
+import type { AuthorViewModel } from '@/features/statistics/model/author.viewmodel'
 import {
   getEvaluationTotals,
   getInformativeTotals,
   getRecordsTotals,
 } from '@/features/statistics/model/author.aggregates'
+import type { AuthorWithInstitutionDto } from '@/features/statistics/model/dto/author.dto'
 
-const VISIBLE_COLS = 8
+const { VISIBLE_COLS, BAR_MAX_WIDTH } = STYLES.CHART
 
 interface BarSeriesDef {
   name: string
   stack: string
   color: string
   isTop?: boolean
-  getData: (a: AuthorWithInstitutionDto) => number
+  getData: (vm: AuthorViewModel) => number
 }
 
 interface BarViewDef {
   key: string
   label: string
   title: string
-  barMaxWidth: number
   series: BarSeriesDef[]
   getTotals: (authors: AuthorWithInstitutionDto[]) => {
     label: string
@@ -31,7 +32,7 @@ interface BarViewDef {
     color?: string
     dim?: boolean
   }[]
-  getAuthorTotal: (a: AuthorWithInstitutionDto) => number
+  getAuthorTotal: (vm: AuthorViewModel) => number
 }
 
 const BAR_VIEWS: BarViewDef[] = [
@@ -39,55 +40,49 @@ const BAR_VIEWS: BarViewDef[] = [
     key: 'informative',
     label: 'Informative',
     title: 'Informative questions per author',
-    barMaxWidth: 28,
     getTotals: getInformativeTotals,
-    getAuthorTotal: (a) => a.totalInformativeQuestions ?? 0,
+    getAuthorTotal: (vm) => vm.answers.informativeTotal,
     series: [
       {
         name: 'Answered',
         stack: 'info',
         color: STYLES.COLORS.open,
-        getData: (a) => Math.max(0, a.totalAnswers - a.evaluableAnswers),
+        getData: (vm) => vm.answers.informativeAnswered,
       },
       {
         name: 'Unanswered',
         stack: 'info',
         color: STYLES.COLORS.infoUnanswered,
         isTop: true,
-        getData: (a) =>
-          Math.max(
-            0,
-            (a.totalInformativeQuestions ?? 0) - Math.max(0, a.totalAnswers - a.evaluableAnswers),
-          ),
+        getData: (vm) => vm.answers.informativeUnanswered,
       },
     ],
   },
   {
-    key: 'evaluation',
-    label: 'Evaluation',
-    title: 'Evaluation questions per author',
-    barMaxWidth: 28,
+    key: 'evaluable',
+    label: 'Evaluable',
+    title: 'Evaluable questions per author',
     getTotals: getEvaluationTotals,
-    getAuthorTotal: (a) => a.totalEvaluableQuestions ?? 0,
+    getAuthorTotal: (vm) => vm.answers.evaluableTotal,
     series: [
       {
         name: 'Correct',
         stack: 'eval',
         color: STYLES.COLORS.completed,
-        getData: (a) => a.totalCorrectAnswers,
+        getData: (vm) => vm.answers.correct,
       },
       {
         name: 'Incorrect',
         stack: 'eval',
         color: STYLES.COLORS.rejected,
-        getData: (a) => Math.max(0, a.evaluableAnswers - a.totalCorrectAnswers),
+        getData: (vm) => vm.answers.incorrect,
       },
       {
         name: 'Unanswered',
         stack: 'eval',
         color: STYLES.COLORS.unanswered,
         isTop: true,
-        getData: (a) => Math.max(0, (a.totalEvaluableQuestions ?? 0) - a.evaluableAnswers),
+        getData: (vm) => vm.answers.evaluableUnanswered,
       },
     ],
   },
@@ -95,28 +90,27 @@ const BAR_VIEWS: BarViewDef[] = [
     key: 'records',
     label: 'Records',
     title: 'Records per author',
-    barMaxWidth: 28,
     getTotals: getRecordsTotals,
-    getAuthorTotal: (a) => a.totalRecords,
+    getAuthorTotal: (vm) => vm.totalRecords,
     series: [
       {
         name: 'Completed',
         stack: 'phase',
         color: STYLES.COLORS.completed,
-        getData: (a) => a.byPhase.completed,
+        getData: (vm) => vm.byPhase.completed,
       },
       {
         name: 'Rejected',
         stack: 'phase',
         color: STYLES.COLORS.rejected,
-        getData: (a) => a.byPhase.rejected,
+        getData: (vm) => vm.byPhase.rejected,
       },
       {
         name: 'Open',
         stack: 'phase',
         color: STYLES.COLORS.open,
         isTop: true,
-        getData: (a) => a.byPhase.open,
+        getData: (vm) => vm.byPhase.open,
       },
     ],
   },
@@ -129,9 +123,15 @@ const BarChart = ({
   authors: AuthorWithInstitutionDto[]
   viewDef: BarViewDef
 }) => {
-  const sorted = [...authors].sort((a, b) => b.totalRecords - a.totalRecords)
+  // compute once per render, not once per data point per series
+  const sorted = useMemo(
+    () => [...authors].sort((a, b) => b.totalRecords - a.totalRecords),
+    [authors],
+  )
+  const viewModels = useMemo(() => sorted.map(toAuthorViewModel), [sorted])
+
   const total = sorted.length
-  const names = sorted.map((a) => a.fullName || a.username)
+  const names = viewModels.map((vm) => vm.displayName)
   const scrollable = total > VISIBLE_COLS
   const endPct = scrollable ? Math.round((VISIBLE_COLS / total) * 100) : 100
 
@@ -141,9 +141,7 @@ const BarChart = ({
       axisPointer: { type: 'shadow' },
       formatter: (params: any[]) => {
         const idx = params[0].dataIndex as number
-        const author = sorted[idx]
-        const name = names[idx]
-        const total = viewDef.getAuthorTotal(author)
+        const vm = viewModels[idx]
         const rows = params
           .filter((p: any) => (p.value as number) > 0)
           .map(
@@ -151,7 +149,7 @@ const BarChart = ({
               `<span style="color:${p.color as string}">●</span> ${p.seriesName as string}: <b>${p.value as number}</b>`,
           )
           .join('<br/>')
-        return `<b>${name}</b><br/>${rows}<br/><span style="color:#9ca3af">Total: <b style="color:#374151">${total}</b></span>`
+        return `<b>${vm.displayName}</b><br/>${rows}<br/><span style="color:#9ca3af">Total: <b style="color:#374151">${viewDef.getAuthorTotal(vm)}</b></span>`
       },
     },
     legend: {
@@ -217,8 +215,8 @@ const BarChart = ({
       name: s.name,
       type: 'bar',
       stack: s.stack,
-      barMaxWidth: viewDef.barMaxWidth,
-      data: sorted.map((a) => s.getData(a)),
+      barMaxWidth: BAR_MAX_WIDTH,
+      data: viewModels.map((vm) => s.getData(vm)), // ← clean: one vm per author
       itemStyle: {
         color: s.color,
         ...(s.isTop ? { borderRadius: [3, 3, 0, 0] } : {}),

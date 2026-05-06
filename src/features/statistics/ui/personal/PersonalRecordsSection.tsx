@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { RecordSummaryDto, StatisticsInterval } from '@/features/statistics/dtoTypes'
 import { StatisticsSection } from '@/features/statistics/components/StatisticsSection'
 import { IntervalPicker } from '@/features/statistics/components/IntervalPicker'
 import { SkeletonCard } from '@/shared/components/SkeletonCard'
@@ -11,6 +10,8 @@ import {
   useRecordTable,
 } from '@/features/statistics/components/records'
 import { usePersonalRecords } from '@/features/statistics/api/records.hooks.ts'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 interface Props {
   selected: RecordSummaryDto | null
@@ -40,7 +41,6 @@ export const PersonalRecordsSection = ({ selected, onSelect }: Props) => {
     <StatisticsSection
       meta={meta}
       controls={<IntervalPicker value={interval} onChange={handleIntervalChange} />}
-      defaultCollapsed
     >
       {isLoading || !data ? (
         <Skeleton />

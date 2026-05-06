@@ -1,9 +1,4 @@
 import { useState } from 'react'
-import type {
-  RecordSummaryDto,
-  RecordSummaryWithAuthorDto,
-  StatisticsInterval,
-} from '@/features/statistics/dtoTypes'
 import { StatisticsSection } from '@/features/statistics/components/StatisticsSection'
 import { IntervalPicker } from '@/features/statistics/components/IntervalPicker'
 import { RecordDetailPanel } from '@/features/statistics/components/records/RecordDetailPanel'
@@ -15,6 +10,11 @@ import { ALL_RECORDS_COLUMNS } from '@/features/statistics/components/records/co
 import { defaultSearchPredicate } from '@/features/statistics/components/records/useRecordTable'
 import type { SearchPredicate } from '@/features/statistics/components/records/types'
 import { useAllRecords } from '@/features/statistics/api/records.hooks.ts'
+import type {
+  RecordSummaryDto,
+  RecordSummaryWithAuthorDto,
+} from '@/features/statistics/model/dto/record.dto.ts'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 const allRecordsSearchPredicate: SearchPredicate = (r, q) => {
   const withAuthor = r as RecordSummaryWithAuthorDto
@@ -54,7 +54,7 @@ export const AllRecordsSection = () => {
             columns={ALL_RECORDS_COLUMNS}
             selected={selected}
             onSelect={handleSelect}
-            searchPlaceholder="Search by name, template, institution or author…"
+            searchPlaceholder="Search by record name, template, institution or author…"
             searchPredicate={allRecordsSearchPredicate}
           />
         )}

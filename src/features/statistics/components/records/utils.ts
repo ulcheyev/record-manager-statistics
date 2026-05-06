@@ -1,4 +1,4 @@
-import type { RecordSummaryDto } from '@/features/statistics/dtoTypes'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 export const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })

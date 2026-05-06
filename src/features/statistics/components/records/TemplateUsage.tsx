@@ -1,5 +1,5 @@
-import type { TemplateSliceDto } from '@/features/statistics/dtoTypes'
 import { TEMPLATE_COLORS } from './constants'
+import type { TemplateSliceDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 interface Props {
   templates: TemplateSliceDto[]

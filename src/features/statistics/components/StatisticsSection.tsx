@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react'
-import type { StatisticsWithMetadata } from '@/features/statistics/dtoTypes'
+import type { StatisticsWithMetadata } from '@/shared/dto/statistics.dto.ts'
 
 interface Props {
   meta: StatisticsWithMetadata

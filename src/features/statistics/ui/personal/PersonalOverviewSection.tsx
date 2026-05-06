@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
 import { useAuth } from '@/shared/hooks/useAuth'
 import { useError } from '@/shared/hooks/useError'
 import { StatisticsSection } from '@/features/statistics/components/StatisticsSection'
@@ -7,6 +6,7 @@ import { IntervalPicker } from '@/features/statistics/components/IntervalPicker'
 import { SkeletonCard } from '@/shared/components/SkeletonCard'
 import { PersonalOverviewContent } from '@/features/statistics/components/personal/PersonalOverviewContent'
 import { useAuthorByUsername } from '@/features/statistics/api/authors.hooks.ts'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 const Skeleton = () => (
   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

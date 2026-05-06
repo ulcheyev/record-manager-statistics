@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { statisticsProvider } from '@/features/statistics/provider'
 import { QUERY_KEYS } from '@/config/constants'
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 export const useAllInstitutions = (interval: StatisticsInterval) =>
   useQuery({

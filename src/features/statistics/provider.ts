@@ -2,15 +2,15 @@ import { apiClient } from '@/shared/api/client'
 import { mockStatisticsProvider } from '@/features/statistics/mock'
 import { isDemo } from '@/config/runtime'
 import { API } from '@/config/constants'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 import type {
   AuthorOverviewDto,
   AuthorsOverviewDto,
   AuthorsStatisticsDto,
-  InstitutionsStatisticsDto,
-  RecordListDto,
-  StatisticsInterval,
-  UserStatisticsPermissionsDto,
-} from '@/features/statistics/dtoTypes'
+} from '@/features/statistics/model/dto/author.dto.ts'
+import type { RecordListDto } from '@/features/statistics/model/dto/record.dto.ts'
+import type { UserStatisticsPermissionsDto } from '@/features/statistics/model/dto/permissions.dto.ts'
+import type { InstitutionsStatisticsDto } from '@/features/statistics/model/dto/institution.dto.ts'
 
 export interface StatisticsProvider {
   getAllAuthorsOverview(interval: StatisticsInterval): Promise<AuthorsOverviewDto>

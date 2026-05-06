@@ -55,11 +55,9 @@ export const StatCard = ({ label, value, accent, small, hint }: Props) => {
     `}
     >
       {styles && <div className={`absolute left-0 right-0 top-0 h-[2px] ${styles.bar}`} />}
-
-      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-2.5">
+      <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-2.5">
         {label}
       </p>
-
       <p
         className={`font-semibold leading-tight tabular-nums ${
           small ? 'text-base text-gray-700' : 'text-2xl'
@@ -68,7 +66,7 @@ export const StatCard = ({ label, value, accent, small, hint }: Props) => {
         {value === null || value === undefined || value === '' ? '—' : value}
       </p>
 
-      {hint && <p className="mt-1 text-[11px] text-gray-400 leading-snug">{hint}</p>}
+      {hint && <p className="mt-1 text-[14px] text-gray-500 leading-snug">{hint}</p>}
     </div>
   )
 }

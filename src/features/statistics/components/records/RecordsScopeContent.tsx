@@ -1,10 +1,10 @@
-import type { RecordListDto, RecordSummaryDto } from '@/features/statistics/dtoTypes'
 import type { ColumnDef, SearchPredicate } from './types'
 import { defaultSearchPredicate, useRecordTable } from './useRecordTable'
 import { FilterBar } from './FilterBar'
 import { RecordsTable } from './RecordsTable'
 import { RecordsOverview } from './RecordsOverview'
 import { SkeletonCard } from '@/shared/components/SkeletonCard'
+import type { RecordListDto, RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 interface Props {
   data: RecordListDto

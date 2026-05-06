@@ -1,4 +1,4 @@
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 const INPUT_CLASS =
   'rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-colors'

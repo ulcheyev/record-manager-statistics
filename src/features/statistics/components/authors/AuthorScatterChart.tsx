@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import ReactECharts from 'echarts-for-react'
-import type { AuthorWithInstitutionDto } from '@/features/statistics/dtoTypes'
 import { STYLES } from '@/config/constants'
 import { ViewTotalsBar } from './ViewTotalsBar'
 import { toAuthorViewModel } from '@/features/statistics/model/author.viewmodel'
@@ -10,6 +9,7 @@ import {
   getAnsweredTotals,
   getUnansweredTotals,
 } from '@/features/statistics/model/author.aggregates'
+import type { AuthorWithInstitutionDto } from '@/features/statistics/model/dto/author.dto.ts'
 
 interface ScatterViewDef {
   key: string
@@ -35,13 +35,21 @@ const SCATTER_VIEWS: ScatterViewDef[] = [
     yFmt: '{value}%',
     yMax: 100,
     getTotals: getCorrectnessTotals,
-    getAuthorLabel: (a) => `${a.totalCorrectAnswers}/${a.evaluableAnswers}`,
-    yField: (a) => a.correctnessRate,
-    tooltipLines: (a) => [
-      `Records: <b>${a.totalRecords}</b>`,
-      `Correctness: <b>${a.correctnessRate.toFixed(1)}%</b>`,
-      `Correct / evaluable: <b>${a.totalCorrectAnswers}</b> / <b>${a.evaluableAnswers}</b>`,
-    ],
+    getAuthorLabel: (a) => {
+      const vm = toAuthorViewModel(a)
+      return vm.answers.hasCorrectness
+        ? `${vm.answers.correct}/${vm.answers.evaluableAnswered}`
+        : '—'
+    },
+    yField: (a) => toAuthorViewModel(a).answers.correctnessRate,
+    tooltipLines: (a) => {
+      const vm = toAuthorViewModel(a)
+      return [
+        `Records: <b>${vm.totalRecords}</b>`,
+        `Correctness: <b>${vm.answers.correctnessRateFmt}</b>`,
+        `Correct answers: <b>${vm.answers.correct}</b> / <b>${vm.answers.evaluableAnswered}</b>`,
+      ]
+    },
   },
   {
     key: 'completion',
@@ -51,13 +59,21 @@ const SCATTER_VIEWS: ScatterViewDef[] = [
     yFmt: '{value}%',
     yMax: 100,
     getTotals: getCompletionTotals,
-    getAuthorLabel: (a) => `${a.byPhase.completed}/${a.totalRecords}`,
+    getAuthorLabel: (a) => {
+      const vm = toAuthorViewModel(a)
+      return `${vm.byPhase.completed}/${vm.totalRecords}`
+    },
     yField: (a) => a.completionRate,
-    tooltipLines: (a) => [
-      `Records: <b>${a.totalRecords}</b>`,
-      `Completion: <b>${a.completionRate.toFixed(1)}%</b>`,
-      `Rejection: <b>${a.rejectionRate.toFixed(1)}%</b>`,
-    ],
+    tooltipLines: (a) => {
+      const vm = toAuthorViewModel(a)
+      return [
+        `Records: <b>${vm.totalRecords}</b>`,
+        `Completed: <b>${vm.byPhase.completed}</b>`,
+        `Open: <b>${vm.byPhase.open}</b>`,
+        `Rejected: <b>${vm.byPhase.rejected}</b>`,
+        `Completion: <b>${vm.completionRateFmt}</b>`,
+      ]
+    },
   },
   {
     key: 'answered',
@@ -66,16 +82,16 @@ const SCATTER_VIEWS: ScatterViewDef[] = [
     yName: 'Answers given',
     yFmt: '{value}',
     getTotals: getAnsweredTotals,
-    getAuthorLabel: (a) => `${a.totalAnswers}`,
-    yField: (a) => a.totalAnswers,
+    getAuthorLabel: (a) => `${toAuthorViewModel(a).answers.totalAnswers}`,
+    yField: (a) => toAuthorViewModel(a).answers.totalAnswers,
     tooltipLines: (a) => {
-      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
-      const unans = totalQ > 0 ? totalQ - a.totalAnswers : null
+      const vm = toAuthorViewModel(a)
       return [
-        `Records: <b>${a.totalRecords}</b>`,
-        `Answered: <b>${a.totalAnswers}</b>`,
-        ...(unans !== null ? [`Unanswered: <b>${unans}</b>`] : []),
-        `Evaluable answered: <b>${a.evaluableAnswers}</b>`,
+        `Records: <b>${vm.totalRecords}</b>`,
+        `Answered questions: <b>${vm.answers.totalAnswers}</b>`,
+        `Evaluable: <b>${vm.answers.evaluableAnswered}</b>`,
+        `Informative: <b>${vm.answers.informativeAnswered}</b>`,
+        `Answer rate: <b>${vm.answers.answerRateFmt}</b>`,
       ]
     },
   },
@@ -87,26 +103,23 @@ const SCATTER_VIEWS: ScatterViewDef[] = [
     yFmt: '{value}',
     getTotals: getUnansweredTotals,
     getAuthorLabel: (a) => {
-      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
-      return `${Math.max(0, totalQ - a.totalAnswers)}/${totalQ}`
+      const vm = toAuthorViewModel(a)
+      return `${vm.answers.totalUnanswered}/${vm.answers.totalQuestions}`
     },
-    yField: (a) => {
-      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
-      return totalQ > 0 ? Math.max(0, totalQ - a.totalAnswers) : 0
-    },
+    yField: (a) => toAuthorViewModel(a).answers.totalUnanswered,
     tooltipLines: (a) => {
-      const totalQ = (a.totalEvaluableQuestions ?? 0) + (a.totalInformativeQuestions ?? 0)
-      const unans = Math.max(0, totalQ - a.totalAnswers)
+      const vm = toAuthorViewModel(a)
       return [
-        `Records: <b>${a.totalRecords}</b>`,
-        `Unanswered: <b>${unans}</b> of ${totalQ}`,
-        `Answered: <b>${a.totalAnswers}</b>`,
+        `Records: <b>${vm.totalRecords}</b>`,
+        `Unanswered questions: <b>${vm.answers.totalUnanswered}</b> / <b>${vm.answers.totalQuestions}</b>`,
+        `Answered questions: <b>${vm.answers.totalAnswers}</b>`,
+        `Answer rate: <b>${vm.answers.answerRateFmt}</b>`,
       ]
     },
   },
 ]
 
-const ALL_VIEWS = [...SCATTER_VIEWS.map((v) => ({ key: v.key, label: v.label }))]
+const ALL_VIEWS = SCATTER_VIEWS.map((v) => ({ key: v.key, label: v.label }))
 
 const ScatterView = ({
   authors,
@@ -133,7 +146,7 @@ const ScatterView = ({
       name: toAuthorViewModel(a).displayName,
       author: a,
     })),
-    symbolSize: 9,
+    symbolSize: STYLES.CHART.SCATTER_SYMBOL_SIZE,
     itemStyle: {
       color: STYLES.INSTITUTION_PALETTE[idx % STYLES.INSTITUTION_PALETTE.length],
       opacity: 0.85,
@@ -168,12 +181,7 @@ const ScatterView = ({
       formatter: (p: any) => {
         const a = p.data.author as AuthorWithInstitutionDto
         const vm = toAuthorViewModel(a)
-        return [
-          `<b>${vm.displayName}</b>`,
-          vm.institutionName,
-          ...viewDef.tooltipLines(a),
-          `<span style="color:#9ca3af">Total: <b style="color:#374151">${viewDef.getAuthorLabel(a)}</b></span>`,
-        ]
+        return [`<b>${vm.displayName}</b>`, vm.institutionName, ...viewDef.tooltipLines(a)]
           .filter(Boolean)
           .join('<br/>')
       },
