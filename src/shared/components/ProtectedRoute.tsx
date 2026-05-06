@@ -1,8 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/shared/hooks/useAuth'
 import { routes } from '@/config/routes'
-import type { UserStatisticsPermissionsDto } from '@/features/statistics/dtoTypes'
 import { usePermissions } from '@/features/statistics/api/permissions.hooks.ts'
+import type { UserStatisticsPermissionsDto } from '@/features/statistics/model/dto/permissions.dto.ts'
 
 interface Props {
   roles?: string[]
@@ -10,9 +10,14 @@ interface Props {
 }
 
 export const ProtectedRoute = ({ roles, check }: Props) => {
-  const { isAuthenticated, hasRole } = useAuth()
-  const { data: permissions, isLoading } = usePermissions({ enabled: isAuthenticated })
   const location = useLocation()
+  const { isAuthenticated, hasRole } = useAuth()
+
+  const needsPermissions = Boolean(check)
+
+  const { data: permissions, isLoading } = usePermissions({
+    enabled: isAuthenticated && needsPermissions,
+  })
 
   if (!isAuthenticated) {
     return <Navigate to={routes.unauthorized} state={{ from: location }} replace />
@@ -24,6 +29,7 @@ export const ProtectedRoute = ({ roles, check }: Props) => {
 
   if (check) {
     if (isLoading) return null
+
     if (!permissions || !check(permissions)) {
       return <Navigate to={routes.unauthorized} replace />
     }

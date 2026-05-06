@@ -1,5 +1,5 @@
-import type { AuthorsOverviewDto } from '@/features/statistics/dtoTypes'
 import { StatCard } from '@/features/statistics/components/StatCard'
+import type { AuthorsOverviewDto } from '@/features/statistics/model/dto/author.dto.ts'
 
 interface Props {
   overview: AuthorsOverviewDto

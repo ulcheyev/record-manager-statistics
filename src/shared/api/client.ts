@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { config, isDemo } from '@/config/runtime'
-import { API } from '@/config/constants'
+import { API, LAYOUT } from '@/config/constants'
 import kc from '@/config/keycloak.config'
 import { errorEmitter } from '@/shared/context/ErrorContext'
 
@@ -12,7 +12,7 @@ const prodRequestInterceptor = async (
   req: InternalAxiosRequestConfig,
 ): Promise<InternalAxiosRequestConfig> => {
   try {
-    await kc.updateToken(30)
+    await kc.updateToken(LAYOUT.TOKEN_REFRESH_SECONDS)
     req.headers[API.HEADERS.AUTHORIZATION] = `Bearer ${kc.token}`
   } catch {
     errorEmitter.emit('Session expired.')

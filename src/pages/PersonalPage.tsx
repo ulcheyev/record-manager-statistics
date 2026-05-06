@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import type { RecordSummaryDto } from '@/features/statistics/dtoTypes'
 import { PersonalOverviewSection } from '@/features/statistics/ui/personal/PersonalOverviewSection'
 import { PersonalRecordsSection } from '@/features/statistics/ui/personal/PersonalRecordsSection'
 import { RecordDetailPanel } from '@/features/statistics/components/records'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 export const PersonalPage = () => {
   const [selected, setSelected] = useState<RecordSummaryDto | null>(null)

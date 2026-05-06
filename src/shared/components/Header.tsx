@@ -8,8 +8,8 @@ import {
   canViewRecords,
   canViewStatistics,
 } from '@/features/statistics/model/permissions.model'
-import type { UserStatisticsPermissionsDto } from '@/features/statistics/dtoTypes'
 import { usePermissions } from '@/features/statistics/api/permissions.hooks.ts'
+import type { UserStatisticsPermissionsDto } from '@/features/statistics/model/dto/permissions.dto.ts'
 
 const TABS: { label: string; to: string; visible: (p: UserStatisticsPermissionsDto) => boolean }[] =
   [

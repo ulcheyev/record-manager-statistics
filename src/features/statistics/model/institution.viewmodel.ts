@@ -1,7 +1,9 @@
 import type {
-  InstitutionSummaryDto,
   InstitutionsStatisticsDto,
-} from '@/features/statistics/dtoTypes'
+  InstitutionSummaryDto,
+} from '@/features/statistics/model/dto/institution.dto.ts'
+import { THRESHOLDS } from '@/config/constants.ts'
+import { type AnswerModel, toAnswerModel } from '@/features/statistics/model/answer.model.ts'
 
 export interface InstitutionRowViewModel {
   uri: string
@@ -10,12 +12,16 @@ export interface InstitutionRowViewModel {
   authorCount: number
   completionRateFmt: string
   rejectionRateFmt: string
-  totalAnswers: number
-  evaluableAnswers: number
-  totalCorrectAnswers: number
-  correctnessRateFmt: string
-  correctnessGood: boolean
   completionGood: boolean
+  answers: AnswerModel
+}
+
+export interface InstitutionsOverviewViewModel {
+  totalInstitutions: number
+  mostRecordsInfo: string
+  mostAnswersInfo: string
+  bestCompletionInfo: string
+  bestCorrectnessInfo: string
 }
 
 export const toInstitutionRowViewModel = (dto: InstitutionSummaryDto): InstitutionRowViewModel => ({
@@ -25,21 +31,9 @@ export const toInstitutionRowViewModel = (dto: InstitutionSummaryDto): Instituti
   authorCount: dto.authorCount,
   completionRateFmt: `${dto.completionRate.toFixed(1)}%`,
   rejectionRateFmt: `${dto.rejectionRate.toFixed(1)}%`,
-  totalAnswers: dto.totalAnswers,
-  evaluableAnswers: dto.evaluableAnswers,
-  totalCorrectAnswers: dto.totalCorrectAnswers,
-  correctnessRateFmt: `${dto.correctnessRate.toFixed(1)}%`,
-  correctnessGood: dto.correctnessRate >= 70,
-  completionGood: dto.completionRate >= 70,
+  completionGood: dto.completionRate >= THRESHOLDS.COMPLETION_GOOD,
+  answers: toAnswerModel(dto.questions, dto.answers),
 })
-
-export interface InstitutionsOverviewViewModel {
-  totalInstitutions: number
-  mostRecordsInfo: string
-  mostAnswersInfo: string
-  bestCompletionInfo: string
-  bestCorrectnessInfo: string
-}
 
 export const toInstitutionsOverviewViewModel = (
   dto: InstitutionsStatisticsDto,

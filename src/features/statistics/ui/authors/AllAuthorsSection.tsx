@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
 import { StatisticsSection } from '@/features/statistics/components/StatisticsSection'
 import { IntervalPicker } from '@/features/statistics/components/IntervalPicker'
 import { AuthorScopeContent, AuthorScopeSkeleton } from './AuthorScopeContent'
 import { useAllAuthors } from '@/features/statistics/api/authors.hooks.ts'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 export const AllAuthorsSection = () => {
   const [interval, setInterval] = useState<StatisticsInterval>({})

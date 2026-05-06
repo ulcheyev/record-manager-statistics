@@ -1,10 +1,12 @@
+import { THRESHOLDS } from '@/config/constants'
 import type {
-  RecordSummaryDto,
-  RecordSummaryWithInstitutionDto,
-  RecordSummaryWithAuthorDto,
   RecordListDto,
+  RecordSummaryDto,
+  RecordSummaryWithAuthorDto,
+  RecordSummaryWithInstitutionDto,
   TemplateSliceDto,
-} from '@/features/statistics/dtoTypes'
+} from '@/features/statistics/model/dto/record.dto'
+import { type AnswerModel, toAnswerModel } from '@/features/statistics/model/answer.model.ts'
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -21,20 +23,11 @@ export interface RecordRowViewModel {
   phase: string
   formTemplateLabel: string
   dateCreatedFmt: string
-  totalQuestions: number
-  totalAnswers: number
-  totalEvaluableAnswers: number
-  totalCorrectAnswers: number
-  correctnessRateFmt: string
-  hasEvaluableAnswers: boolean
-  correctnessGood: boolean
-  hasCertification: boolean
-  certificationLabel: string | null
-  certificationDesc: string | null
   institutionName: string | null
   authorDisplayName: string | null
   authorUsername: string | null
   authorHasFullName: boolean
+  answers: AnswerModel
 }
 
 export const toRecordRowViewModel = (dto: RecordSummaryDto): RecordRowViewModel => {
@@ -49,22 +42,31 @@ export const toRecordRowViewModel = (dto: RecordSummaryDto): RecordRowViewModel 
     phase: dto.phase,
     formTemplateLabel: dto.formTemplateLabel ?? '—',
     dateCreatedFmt: fmtDate(dto.dateCreated),
-    totalQuestions: dto.totalQuestions,
-    totalAnswers: dto.totalAnswers,
-    totalEvaluableAnswers: dto.totalEvaluableAnswers,
-    totalCorrectAnswers: dto.totalCorrectAnswers,
-    correctnessRateFmt: `${dto.correctnessRate.toFixed(1)}%`,
-    hasEvaluableAnswers: dto.totalEvaluableAnswers > 0,
-    correctnessGood: dto.correctnessRate >= 70,
-    hasCertification: dto.certification !== null,
-    certificationLabel: dto.certification?.label ?? null,
-    certificationDesc: dto.certification?.description ?? null,
     institutionName: withInst.institutionName ?? null,
     authorDisplayName: authorFull ?? authorUser,
     authorUsername: authorUser,
     authorHasFullName: authorFull !== null && authorUser !== null,
+    answers: toAnswerModel(dto.questions, dto.answers),
   }
 }
+
+export interface RecordDetailViewModel {
+  uri: string
+  displayName: string
+  phase: string
+  formTemplateLabel: string | null
+  dateCreatedFmt: string
+  answers: AnswerModel
+}
+
+export const toRecordDetailViewModel = (dto: RecordSummaryDto): RecordDetailViewModel => ({
+  uri: dto.uri,
+  displayName: resolveDisplayName(dto),
+  phase: dto.phase,
+  formTemplateLabel: dto.formTemplateLabel ?? null,
+  dateCreatedFmt: fmtDate(dto.dateCreated),
+  answers: toAnswerModel(dto.questions, dto.answers),
+})
 
 export interface RecordsOverviewViewModel {
   total: number
@@ -81,15 +83,20 @@ export interface RecordsOverviewViewModel {
 
 export const toRecordsOverviewViewModel = (dto: RecordListDto): RecordsOverviewViewModel => {
   const dist = dto.phaseDistribution
-
   const open = dist.distribution.find((d) => d.phase === 'OPEN')?.count ?? 0
   const completed = dist.distribution.find((d) => d.phase === 'COMPLETED')?.count ?? 0
   const rejected = dist.distribution.find((d) => d.phase === 'REJECTED')?.count ?? 0
 
-  const evaluable = dto.records.filter((r) => r.totalEvaluableAnswers > 0)
+  const evaluableRecords = dto.records.filter((r) => r.questions.evaluable > 0)
   const avgCorrectness =
-    evaluable.length > 0
-      ? evaluable.reduce((sum, r) => sum + r.correctnessRate, 0) / evaluable.length
+    evaluableRecords.length > 0
+      ? evaluableRecords.reduce((acc, r) => {
+          const rate =
+            r.answers.evaluable.answered > 0
+              ? (r.answers.evaluable.correct / r.answers.evaluable.answered) * 100
+              : 0
+          return acc + rate
+        }, 0) / evaluableRecords.length
       : null
 
   return {
@@ -99,8 +106,8 @@ export const toRecordsOverviewViewModel = (dto: RecordListDto): RecordsOverviewV
     rejected,
     completionRateFmt: dist.total > 0 ? `${((completed / dist.total) * 100).toFixed(1)}%` : '—',
     avgCorrectnessFmt: avgCorrectness !== null ? `${avgCorrectness.toFixed(1)}%` : null,
-    avgCorrectnessGood: avgCorrectness !== null && avgCorrectness >= 70,
-    evaluableCount: evaluable.length,
+    avgCorrectnessGood: avgCorrectness !== null && avgCorrectness >= THRESHOLDS.CORRECTNESS_GOOD,
+    evaluableCount: evaluableRecords.length,
     templates: dto.formTemplateUsage.templates,
     hasTemplates: dto.formTemplateUsage.templates.length > 0,
   }

@@ -1,6 +1,13 @@
 export const QUERY_CONFIG = {
   STALE_TIME: 5 * 60 * 1000,
   RETRY: 1,
+  LIVE_STATS_QUERY_OPTIONS: {
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always' as const,
+    refetchOnWindowFocus: 'always' as const,
+    refetchOnReconnect: 'always' as const,
+  },
 } as const
 
 export const APP = {
@@ -69,6 +76,21 @@ export const ROLES = {
   VIEW_STATISTICS: 'read-statistics-role',
 } as const
 
+// Domain thresholds
+export const THRESHOLDS = {
+  CORRECTNESS_GOOD: 60,
+  COMPLETION_GOOD: 60,
+} as const
+
+export const LAYOUT = {
+  HEADER_HEIGHT: 60, // px – RecordDetailPanel top offset, Header height
+  TOKEN_REFRESH_SECONDS: 30, // Keycloak token refresh buffer
+} as const
+
+export const PAGINATION = {
+  PAGE_SIZE: 15,
+} as const
+
 export const STYLES = {
   COLORS: {
     open: '#60a5fa',
@@ -87,5 +109,14 @@ export const STYLES = {
     scrollBorderColor: '#e5e7eb',
     scrollHandleColor: '#60a5fa',
     tooltipBgColor: 'rgba(255,255,255,0.85)',
+
+    // Extracted magic numbers
+    VISIBLE_COLS: 8, // max columns before bar chart scrolls
+    BAR_MAX_WIDTH: 28, // px – max bar width in bar charts
+    SCATTER_SYMBOL_SIZE: 9, // px – scatter plot dot size
+
+    // Institution bar chart
+    INSTITUTION_ROW_HEIGHT: 44, // px per row
+    INSTITUTION_CHART_MIN_HEIGHT: 220, // px floor
   },
-}
+} as const

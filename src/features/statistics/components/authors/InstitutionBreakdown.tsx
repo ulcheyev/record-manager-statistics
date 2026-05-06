@@ -1,10 +1,11 @@
 import ReactECharts from 'echarts-for-react'
 import { StatCard } from '@/features/statistics/components/StatCard'
-import type { InstitutionsStatisticsDto } from '@/features/statistics/dtoTypes'
+import { STYLES } from '@/config/constants'
 import {
   toInstitutionRowViewModel,
   toInstitutionsOverviewViewModel,
 } from '@/features/statistics/model/institution.viewmodel'
+import type { InstitutionsStatisticsDto } from '@/features/statistics/model/dto/institution.dto.ts'
 
 interface Props {
   data: InstitutionsStatisticsDto
@@ -16,7 +17,10 @@ export const InstitutionBreakdown = ({ data }: Props) => {
     .sort((a, b) => b.totalRecords - a.totalRecords)
     .map(toInstitutionRowViewModel)
 
-  const height = Math.max(220, rows.length * 44)
+  const height = Math.max(
+    STYLES.CHART.INSTITUTION_CHART_MIN_HEIGHT,
+    rows.length * STYLES.CHART.INSTITUTION_ROW_HEIGHT,
+  )
 
   const option = {
     tooltip: {
@@ -29,7 +33,7 @@ export const InstitutionBreakdown = ({ data }: Props) => {
           `Records: <b>${vm.totalRecords}</b>`,
           `Authors: <b>${vm.authorCount}</b>`,
           `Completion: <b>${vm.completionRateFmt}</b>`,
-          `Correctness: <b>${vm.correctnessRateFmt}</b>`,
+          `Correctness: <b>${vm.answers.correctnessRateFmt}</b>`,
         ].join('<br/>')
       },
     },
@@ -62,7 +66,7 @@ export const InstitutionBreakdown = ({ data }: Props) => {
           },
         })),
         itemStyle: { color: '#2dd4bf', borderRadius: [0, 4, 4, 0] },
-        barMaxWidth: 28,
+        barMaxWidth: STYLES.CHART.BAR_MAX_WIDTH,
       },
     ],
   }

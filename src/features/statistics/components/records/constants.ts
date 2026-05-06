@@ -1,6 +1,7 @@
+import { PAGINATION } from '@/config/constants'
 import type { FilterDef, RecordFilters } from './types'
 
-export const PAGE_SIZE = 6
+export const PAGE_SIZE = PAGINATION.PAGE_SIZE
 
 export const PHASE_STYLES: Record<string, { dot: string; text: string; bg: string }> = {
   OPEN: { dot: 'bg-blue-400', text: 'text-blue-700', bg: 'bg-blue-50' },
@@ -19,14 +20,13 @@ export const TEMPLATE_COLORS = [
 ]
 
 export const EMPTY_FILTERS: RecordFilters = {
-  certification: 'all',
   correctness: 'all',
   phase: 'ALL',
   template: '',
 }
 
 export const isFiltersEmpty = (f: RecordFilters) =>
-  f.certification === 'all' && f.correctness === 'all' && f.phase === 'ALL' && f.template === ''
+  f.correctness === 'all' && f.phase === 'ALL' && f.template === ''
 
 export const FILTER_DEFS: FilterDef[] = [
   {
@@ -39,17 +39,6 @@ export const FILTER_DEFS: FilterDef[] = [
       { value: 'OPEN', label: 'Open' },
       { value: 'COMPLETED', label: 'Completed' },
       { value: 'REJECTED', label: 'Rejected' },
-    ],
-  },
-  {
-    key: 'certification',
-    label: 'Certification',
-    reset: 'all',
-    isEmpty: (f) => f.certification === 'all',
-    display: (f) => (f.certification === 'certified' ? 'Certified' : 'Not certified'),
-    options: () => [
-      { value: 'certified', label: 'Certified' },
-      { value: 'not_certified', label: 'Not certified' },
     ],
   },
   {

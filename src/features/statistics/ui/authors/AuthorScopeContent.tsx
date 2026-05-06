@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react'
 import { SkeletonCard } from '@/shared/components/SkeletonCard'
-import type { AuthorsOverviewDto, AuthorWithInstitutionDto } from '@/features/statistics/dtoTypes'
-import { AuthorOverviewCards } from '@/features/statistics/components/authors/AuthorOverviewCards.tsx'
-import { AuthorRecordsBarChart } from '@/features/statistics/components/authors/AuthorRecordsBarChart.tsx'
-import { AuthorScatterChart } from '@/features/statistics/components/authors/AuthorScatterChart.tsx'
+import { SearchInput } from '@/shared/components/SearchInput'
+import { AuthorOverviewCards } from '@/features/statistics/components/authors/AuthorOverviewCards'
+import { AuthorRecordsBarChart } from '@/features/statistics/components/authors/AuthorRecordsBarChart'
+import { AuthorScatterChart } from '@/features/statistics/components/authors/AuthorScatterChart'
+import type {
+  AuthorsOverviewDto,
+  AuthorWithInstitutionDto,
+} from '@/features/statistics/model/dto/author.dto.ts'
 
 type SearchField = 'username' | 'fullName' | 'institutionName'
 
@@ -38,49 +42,13 @@ export const AuthorScopeContent = ({ authors, overview, searchFields = DEFAULT_F
     <>
       <AuthorOverviewCards overview={overview} />
 
-      <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5">
-        <svg
-          className="w-3.5 h-3.5 text-gray-400 flex-shrink-0"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <circle cx="6.5" cy="6.5" r="4.5" />
-          <line x1="10.5" y1="10.5" x2="14" y2="14" />
-        </svg>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={placeholder}
-          className="flex-1 text-sm text-gray-700 bg-transparent outline-none placeholder:text-gray-300"
-        />
-        {search && (
-          <div className="flex items-center gap-2.5">
-            <span className="text-[11px] text-gray-400 tabular-nums">
-              {filtered.length} / {authors.length}
-            </span>
-            <button
-              onClick={() => setSearch('')}
-              className="text-gray-300 hover:text-gray-500 transition-colors"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <line x1="3" y1="3" x2="13" y2="13" />
-                <line x1="13" y1="3" x2="3" y2="13" />
-              </svg>
-            </button>
-          </div>
-        )}
-      </div>
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+        placeholder={placeholder}
+        total={authors.length}
+        filtered={filtered.length}
+      />
 
       {filtered.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-400">

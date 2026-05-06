@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import type { RecordSummaryDto } from '@/features/statistics/dtoTypes'
 import type { RecordFilters, SearchPredicate, SortDir, SortKey } from './types'
 import { EMPTY_FILTERS, PAGE_SIZE, PHASE_ORDER } from './constants'
 import { displayName } from './utils'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 export const defaultSearchPredicate: SearchPredicate = (r, q) =>
   (r.name ?? '').toLowerCase().includes(q) ||
@@ -52,14 +52,11 @@ export const useRecordTable = (
 
     if (filters.phase !== 'ALL') rows = rows.filter((r) => r.phase === filters.phase)
 
-    if (filters.certification === 'certified') rows = rows.filter((r) => r.certification !== null)
-    else if (filters.certification === 'not_certified')
-      rows = rows.filter((r) => r.certification === null)
-
-    if (filters.correctness === 'has_correctness')
-      rows = rows.filter((r) => r.totalEvaluableAnswers > 0)
-    else if (filters.correctness === 'non_evaluable')
-      rows = rows.filter((r) => r.totalEvaluableAnswers === 0)
+    if (filters.correctness === 'has_correctness') {
+      rows = rows.filter((r) => r.answers.evaluable.answered > 0)
+    } else if (filters.correctness === 'non_evaluable') {
+      rows = rows.filter((r) => r.answers.evaluable.answered === 0)
+    }
 
     if (filters.template !== '') rows = rows.filter((r) => r.formTemplateLabel === filters.template)
 

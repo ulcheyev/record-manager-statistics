@@ -28,7 +28,7 @@ const templateCol: ColumnDef = {
     const vm = toRecordRowViewModel(r)
     return (
       <span className="text-sm text-gray-500 truncate block">
-        {vm.formTemplateLabel !== '-' ? (
+        {vm.formTemplateLabel !== '—' ? (
           vm.formTemplateLabel
         ) : (
           <span className="text-gray-300">—</span>
@@ -59,23 +59,6 @@ const phaseCol: ColumnDef = {
   sortKey: 'phase',
   width: '1.5fr',
   render: (r) => <PhaseBadge phase={r.phase} />,
-}
-
-const correctnessCol: ColumnDef = {
-  key: 'correctness',
-  label: 'Correctness',
-  width: '1.5fr',
-  render: (r) => {
-    const vm = toRecordRowViewModel(r)
-    if (!vm.hasEvaluableAnswers) return <span className="text-xs text-gray-300">—</span>
-    return (
-      <span
-        className={`text-xs font-semibold tabular-nums ${vm.correctnessGood ? 'text-emerald-600' : 'text-rose-500'}`}
-      >
-        {vm.correctnessRateFmt}
-      </span>
-    )
-  },
 }
 
 const institutionCol: ColumnDef = {
@@ -112,21 +95,13 @@ const authorCol: ColumnDef = {
 
 export const PERSONAL_COLUMNS: ColumnDef[] = [nameCol, templateCol, dateCol, phaseCol]
 
-export const INSTITUTION_COLUMNS: ColumnDef[] = [
-  nameCol,
-  templateCol,
-  dateCol,
-  phaseCol,
-  correctnessCol,
-  authorCol,
-]
+export const INSTITUTION_COLUMNS: ColumnDef[] = [nameCol, templateCol, dateCol, phaseCol, authorCol]
 
 export const ALL_RECORDS_COLUMNS: ColumnDef[] = [
   nameCol,
   templateCol,
   dateCol,
   phaseCol,
-  correctnessCol,
   institutionCol,
   authorCol,
 ]

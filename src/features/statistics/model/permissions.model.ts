@@ -1,4 +1,4 @@
-import type { UserStatisticsPermissionsDto } from '@/features/statistics/dtoTypes'
+import type { UserStatisticsPermissionsDto } from '@/features/statistics/model/dto/permissions.dto.ts'
 
 type P = UserStatisticsPermissionsDto
 

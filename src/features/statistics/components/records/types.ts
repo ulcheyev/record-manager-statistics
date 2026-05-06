@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react'
-import type { RecordSummaryDto } from '@/features/statistics/dtoTypes'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 export type SortKey = 'id' | 'template' | 'date' | 'phase'
 export type SortDir = 'asc' | 'desc'
 
-export type CertFilter = 'all' | 'certified' | 'not_certified'
 export type CorrectnessFilter = 'all' | 'has_correctness' | 'non_evaluable'
 export type PhaseFilter = 'ALL' | 'OPEN' | 'COMPLETED' | 'REJECTED'
 
 export interface RecordFilters {
-  certification: CertFilter
   correctness: CorrectnessFilter
   phase: PhaseFilter
   template: string

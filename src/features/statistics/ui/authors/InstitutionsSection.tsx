@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import type { StatisticsInterval } from '@/features/statistics/dtoTypes'
 import { StatisticsSection } from '@/features/statistics/components/StatisticsSection'
 import { IntervalPicker } from '@/features/statistics/components/IntervalPicker'
 import { SkeletonCard } from '@/shared/components/SkeletonCard'
 import { InstitutionBreakdown } from '@/features/statistics/components/authors/InstitutionBreakdown'
 import { useAllInstitutions } from '@/features/statistics/api/institutions.hooks.ts'
+import type { StatisticsInterval } from '@/shared/dto/statistics.dto.ts'
 
 const Skeleton = () => (
   <>

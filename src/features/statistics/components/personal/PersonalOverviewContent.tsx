@@ -1,7 +1,8 @@
-import type { AuthorOverviewDto } from '@/features/statistics/dtoTypes'
 import { toAuthorViewModel } from '@/features/statistics/model/author.viewmodel'
+import { toPhaseBreakdownViewModel } from '@/features/statistics/model/phase.viewmodel'
 import { StatCard } from '@/features/statistics/components/StatCard'
-import { PhaseBreakdown } from '@/features/statistics/components/personal/PhaseBreakdown.tsx'
+import { PhaseBreakdown } from '@/features/statistics/components/personal/PhaseBreakdown'
+import type { AuthorOverviewDto } from '@/features/statistics/model/dto/author.dto.ts'
 
 interface Props {
   data: AuthorOverviewDto
@@ -9,6 +10,12 @@ interface Props {
 
 export const PersonalOverviewContent = ({ data }: Props) => {
   const vm = toAuthorViewModel(data)
+  const phaseVm = toPhaseBreakdownViewModel(
+    vm.byPhase.open,
+    vm.byPhase.completed,
+    vm.byPhase.rejected,
+  )
+  const isEmpty = vm.answers.totalAnswers == 0
 
   return (
     <>
@@ -16,25 +23,33 @@ export const PersonalOverviewContent = ({ data }: Props) => {
         <StatCard label="Total records" value={vm.totalRecords} accent="info" />
         <StatCard label="Completion rate" value={vm.completionRateFmt} accent="success" />
         <StatCard label="Rejection rate" value={vm.rejectionRateFmt} accent="danger" />
+
         <StatCard
           label="Total answers"
-          value={vm.totalAnswers}
-          hint={`${vm.evaluableAnswers} evaluable`}
+          value={isEmpty ? 'No completed records yet' : vm.answers.totalAnswers}
+          hint={`${vm.answers.evaluableAnswered} evaluable`}
+          small={isEmpty}
         />
+
         <StatCard
           label="Correctness rate"
-          value={vm.correctnessRateFmt}
-          accent="success"
-          hint={`${vm.totalCorrectAnswers} correct`}
+          value={vm.answers.correctnessRateFmt}
+          accent={
+            vm.answers.hasCorrectness
+              ? vm.answers.correctnessGood
+                ? 'success'
+                : 'danger'
+              : undefined
+          }
+          hint={
+            vm.answers.hasCorrectness ? `${vm.answers.correct} correct` : 'No evaluable answers yet'
+          }
         />
+
         <StatCard label="Valid period" value={vm.periodFmt} small />
       </div>
 
-      <PhaseBreakdown
-        open={vm.byPhase.open}
-        completed={vm.byPhase.completed}
-        rejected={vm.byPhase.rejected}
-      />
+      <PhaseBreakdown vm={phaseVm} />
     </>
   )
 }

@@ -1,8 +1,9 @@
-import type { RecordListDto } from '@/features/statistics/dtoTypes'
 import { toRecordsOverviewViewModel } from '@/features/statistics/model/record.viewmodel'
+import { toPhaseBreakdownViewModel } from '@/features/statistics/model/phase.viewmodel'
 import { StatCard } from '@/features/statistics/components/StatCard'
 import { TemplateUsage } from '@/features/statistics/components/records/TemplateUsage'
-import { PhaseBreakdown } from '@/features/statistics/components/personal/PhaseBreakdown.tsx'
+import { PhaseBreakdown } from '@/features/statistics/components/personal/PhaseBreakdown'
+import type { RecordListDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 interface Props {
   data: RecordListDto
@@ -10,19 +11,12 @@ interface Props {
 
 export const RecordsOverview = ({ data }: Props) => {
   const vm = toRecordsOverviewViewModel(data)
+  const phaseVm = toPhaseBreakdownViewModel(vm.open, vm.completed, vm.rejected)
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard label="Total records" value={vm.total} accent="info" />
-        <StatCard
-          label="Completed"
-          value={vm.completed}
-          accent="success"
-          hint={vm.completionRateFmt}
-        />
-        <StatCard label="Open" value={vm.open} />
-        <StatCard label="Rejected" value={vm.rejected} accent="danger" />
         <StatCard
           label="Avg correctness"
           value={vm.avgCorrectnessFmt ?? '-'}
@@ -32,7 +26,7 @@ export const RecordsOverview = ({ data }: Props) => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <PhaseBreakdown open={vm.open} completed={vm.completed} rejected={vm.rejected} />
+        <PhaseBreakdown vm={phaseVm} />
         {vm.hasTemplates && (
           <TemplateUsage templates={vm.templates} total={data.formTemplateUsage.total} />
         )}

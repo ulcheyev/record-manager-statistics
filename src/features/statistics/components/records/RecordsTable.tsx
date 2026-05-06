@@ -1,7 +1,8 @@
-import type { RecordSummaryDto } from '@/features/statistics/dtoTypes'
 import type { ColumnDef, SortDir, SortKey } from './types'
 import { ColHeader } from './ColHeader'
 import { PageBtn } from './PageBtn'
+import { SearchInput } from '@/shared/components/SearchInput'
+import type { RecordSummaryDto } from '@/features/statistics/model/dto/record.dto.ts'
 
 interface Props {
   records: RecordSummaryDto[]
@@ -30,7 +31,7 @@ export const RecordsTable = ({
   onSort,
   search,
   onSearch,
-  searchPlaceholder = 'Search by name or template…',
+  searchPlaceholder = 'Search by record name or use filters…',
   page,
   onPage,
   totalPages,
@@ -38,54 +39,23 @@ export const RecordsTable = ({
 }: Props) => {
   const gridTemplate = columns.map((c) => c.width ?? '1fr').join(' ')
 
+  const handleSearch = (v: string) => {
+    onSearch(v)
+    onPage(1)
+  }
+
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden">
       {/* Search */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
-        <svg
-          className="w-3.5 h-3.5 text-gray-400 flex-shrink-0"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <circle cx="6.5" cy="6.5" r="4.5" />
-          <line x1="10.5" y1="10.5" x2="14" y2="14" />
-        </svg>
-        <input
-          type="text"
+      <div className="px-4 py-3 bg-white border-b border-gray-200">
+        <SearchInput
           value={search}
-          onChange={(e) => {
-            onSearch(e.target.value)
-            onPage(1)
-          }}
+          onChange={handleSearch}
           placeholder={searchPlaceholder}
-          className="flex-1 text-sm text-gray-700 bg-transparent outline-none placeholder:text-gray-300"
+          className="border-0 px-0 py-0 rounded-none bg-transparent"
         />
-        {search && (
-          <button
-            onClick={() => {
-              onSearch('')
-              onPage(1)
-            }}
-            className="text-gray-300 hover:text-gray-500 transition-colors"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <line x1="3" y1="3" x2="13" y2="13" />
-              <line x1="13" y1="3" x2="3" y2="13" />
-            </svg>
-          </button>
-        )}
         {totalFiltered > 0 && (
-          <span className="text-[10px] text-gray-400 tabular-nums flex-shrink-0">
+          <span className="text-[10px] text-gray-400 tabular-nums flex-shrink-0 mt-1 block">
             {totalFiltered} record{totalFiltered !== 1 ? 's' : ''}
           </span>
         )}
