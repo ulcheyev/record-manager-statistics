@@ -244,16 +244,16 @@ export const AuthorRecordsBarChart = ({ authors }: Props) => {
 
   return (
     <div className="rounded-xl bg-white border border-gray-100 p-5">
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider sm:tracking-[0.14em] text-gray-400">
           {viewDef.title}
         </p>
-        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-[11px] font-medium">
+        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-[11px] font-medium self-start sm:self-auto">
           {BAR_VIEWS.map((v, i) => (
             <button
               key={v.key}
               onClick={() => setViewKey(v.key)}
-              className={`px-3 py-1.5 transition-colors ${i > 0 ? 'border-l border-gray-200' : ''} ${
+              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 transition-colors whitespace-nowrap ${i > 0 ? 'border-l border-gray-200' : ''} ${
                 viewKey === v.key
                   ? 'bg-blue-500 text-white'
                   : 'bg-white text-gray-500 hover:bg-gray-50'

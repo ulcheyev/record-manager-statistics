@@ -8,12 +8,7 @@ interface Props {
 
 const ACCENT_STYLES: Record<
   NonNullable<Props['accent']>,
-  {
-    value: string
-    bar: string
-    bg: string
-    border: string
-  }
+  { value: string; bar: string; bg: string; border: string }
 > = {
   success: {
     value: 'text-emerald-600',
@@ -46,7 +41,7 @@ export const StatCard = ({ label, value, accent, small, hint }: Props) => {
 
   return (
     <div
-      className={`group relative rounded-xl border px-5 py-4 overflow-hidden transition-all duration-200
+      className={`group relative rounded-xl border px-3 py-3 sm:px-5 sm:py-4 overflow-hidden transition-all duration-200
       ${styles?.bg ?? 'bg-white'}
       ${styles?.border ?? 'border-gray-100'}
       shadow-[0_1px_2px_rgba(0,0,0,0.02)]
@@ -55,18 +50,18 @@ export const StatCard = ({ label, value, accent, small, hint }: Props) => {
     `}
     >
       {styles && <div className={`absolute left-0 right-0 top-0 h-[2px] ${styles.bar}`} />}
-      <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-[0.12em] mb-2.5">
+      <p className="text-[10px] sm:text-[12px] font-semibold text-gray-400 uppercase tracking-wider sm:tracking-[0.12em] mb-1.5 sm:mb-2.5">
         {label}
       </p>
       <p
         className={`font-semibold leading-tight tabular-nums ${
-          small ? 'text-base text-gray-700' : 'text-2xl'
+          small ? 'text-xs sm:text-base text-gray-700' : 'text-base sm:text-2xl'
         } ${styles?.value ?? 'text-gray-900'}`}
       >
         {value === null || value === undefined || value === '' ? '—' : value}
       </p>
 
-      {hint && <p className="mt-1 text-[14px] text-gray-500 leading-snug">{hint}</p>}
+      {hint && <p className="mt-1 text-[11px] sm:text-[14px] text-gray-500 leading-snug">{hint}</p>}
     </div>
   )
 }

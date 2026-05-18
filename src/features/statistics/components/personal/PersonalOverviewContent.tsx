@@ -15,7 +15,7 @@ export const PersonalOverviewContent = ({ data }: Props) => {
     vm.byPhase.completed,
     vm.byPhase.rejected,
   )
-  const isEmpty = vm.answers.totalAnswers == 0
+  const isEmpty = vm.answers.totalAnswers === 0
 
   return (
     <>
@@ -26,9 +26,8 @@ export const PersonalOverviewContent = ({ data }: Props) => {
 
         <StatCard
           label="Total answers"
-          value={isEmpty ? 'No completed records yet' : vm.answers.totalAnswers}
-          hint={`${vm.answers.evaluableAnswered} evaluable`}
-          small={isEmpty}
+          value={isEmpty ? '—' : vm.answers.totalAnswers}
+          hint={isEmpty ? 'No completed records yet' : `${vm.answers.evaluableAnswered} evaluable`}
         />
 
         <StatCard

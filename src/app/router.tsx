@@ -14,7 +14,7 @@ import { RecordsPage } from '@/pages/RecordsPage.tsx'
 export const MainLayout = () => (
   <div className="flex flex-col min-h-screen">
     <Header />
-    <main className="flex-1 mt-16 p-6">
+    <main className="flex-1 mt-16 p-3 sm:p-6">
       <Outlet />
     </main>
     <Footer />
