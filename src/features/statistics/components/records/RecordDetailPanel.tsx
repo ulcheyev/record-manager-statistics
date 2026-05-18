@@ -24,7 +24,7 @@ export const RecordDetailPanel = ({ record, onClose }: Props) => (
 
     {/* Slide-in shell */}
     <div
-      className={`fixed right-0 z-50 w-full max-w-md bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+      className={`fixed right-0 z-50 w-full max-w-full sm:max-w-md bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
         record ? 'translate-x-0' : 'translate-x-full'
       }`}
       style={{ top: LAYOUT.HEADER_HEIGHT, bottom: 0 }}
@@ -41,7 +41,7 @@ interface ContentProps {
 
 const RecordDetailContent = ({ vm, onClose }: ContentProps) => (
   <>
-    <div className="flex items-start justify-between px-6 pt-6 pb-5 border-b border-gray-100">
+    <div className="flex items-start justify-between px-4 pt-4 pb-4 sm:px-6 sm:pt-6 sm:pb-5 border-b border-gray-100">
       <div>
         <p className="text-[15px] font-semibold uppercase tracking-[0.14em] text-blue-500">
           Record detail
@@ -73,7 +73,7 @@ const RecordDetailContent = ({ vm, onClose }: ContentProps) => (
       </button>
     </div>
 
-    <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+    <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5">
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="Questions" value={vm.answers.totalQuestions} />
 
